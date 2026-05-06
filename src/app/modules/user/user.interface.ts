@@ -6,6 +6,12 @@ export enum UserRole {
   MECHANIC = "MECHANIC",
 }
 
+export enum IsActive {
+    ACTIVE = "ACTIVE",
+    INACTIVE = "INACTIVE",
+    BLOCKED = "BLOCKED"
+}
+
 export interface IUser{
   _id?: Types.ObjectId;
   name: string;
@@ -14,6 +20,6 @@ export interface IUser{
   phone?: string;
   address?: string;
   role: UserRole;
-  isActive?: boolean;
+  isActive?: IsActive;
   isDeleted?: boolean;
 }

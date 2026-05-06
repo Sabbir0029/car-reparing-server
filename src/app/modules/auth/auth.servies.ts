@@ -3,8 +3,7 @@ import jwt from "jsonwebtoken";
 import { IUser } from "../user/user.interface";
 import { User } from "../user/user.model";
 import bcrypt from "bcryptjs";
-import { config } from "../../config";
-import { generateToken } from "../../utils/jwt";
+import { createNewAccessTokenWithRefreshToken, createUserTokens } from "../../utils/userTokens";
 
 // Credential login
 const credentialLogin = async (payload: Partial<IUser>) => {
@@ -26,32 +25,26 @@ const credentialLogin = async (payload: Partial<IUser>) => {
     throw new Error("Incorrect password");
   }
 
-  const jwtPayload = {
-    id: isUserExist._id,
-    email: isUserExist.email,
-    role: isUserExist.role,
-  };
-
-  const accessToken = generateToken(
-    jwtPayload,
-    config.JWT_SECRET as string,
-    config.JWT_EXPIRES as string,
-  );
-
-  const refreshToken = generateToken(
-    jwtPayload,
-    config.JWT_REFRESH_SECRET as string,
-    config.JWT_REFRESH_EXPIRES as string,
-  );
+  const userTokens = createUserTokens(isUserExist);
 
   const { password: _, ...rest } = isUserExist.toObject();
 
   return {
-    ...rest,
-    accessToken,
-    refreshToken,
+    accessToken: userTokens.accessToken,
+    refreshToken: userTokens.refreshToken,
+    user: rest,
   };
 };
+
+const getNewAccessToken = async (refreshToken: string) => {
+    const newAccessToken = await createNewAccessTokenWithRefreshToken(refreshToken)
+
+    return {
+        accessToken: newAccessToken
+    }
+
+}
 export const authServices = {
   credentialLogin,
+  getNewAccessToken,
 };
